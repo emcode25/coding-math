@@ -1,15 +1,18 @@
 var canvas = document.createElement("canvas");
 var context = canvas.getContext("2d");
-var screenWidth, screenHeight;
+var screenWidth = canvas.width = window.innerWidth;
+var screenHeight = canvas.height = window.innerHeight;
 
-var p;
+var mousePos = Vector.create(0, 0);
+var p1, p2;
 
 window.onload = function() {
     document.body.appendChild(canvas);
-    screenWidth = canvas.width = window.innerWidth;
-    screenHeight = canvas.height = window.innerHeight;
+    p1 = Agent.create(screenWidth * Math.random(), screenHeight * Math.random(), 0, 0);
+    p1.radius = 20;
 
-    p = Agent.create(screenWidth / 2, screenHeight / 2, 0, 0);
+    p2 = Agent.create(screenWidth * Math.random(), screenHeight * Math.random(), 0, 0);
+    p2.radius = 20;
 
     document.body.addEventListener("keydown", function(event) {
         //console.log(event.key);
@@ -38,11 +41,15 @@ window.onload = function() {
     document.body.addEventListener("mousemove", function(event) {
         //console.log(event.clientX);
         //console.log(event.clientY);
+
+        mousePos.setX(event.clientX);
+        mousePos.setY(event.clientY);
     });
+
+    gameLoop();
 };
 
 var prevTime = Date.now();
-gameLoop();
 
 function gameLoop() {
     requestAnimationFrame(gameLoop);
@@ -53,5 +60,11 @@ function gameLoop() {
 
     context.clearRect(0, 0, screenWidth, screenHeight);
 
-    p.render(context);
+    p1.update(deltaTime, mousePos);
+    p2.update(deltaTime, p1.position);
+
+    context.fillStyle = "#000000";
+    p1.render(context);
+    context.fillStyle = "#ff0000"
+    p2.render(context);
 }

@@ -9,9 +9,9 @@ var Agent = {
     scale: 0,
     bradius: 0,
     tag: false,
-    mass: 0,
-    maxSpeed: 0,
-    maxForce: 0,
+    mass: 0.1,
+    maxSpeed: 300,
+    maxForce: 100000,
     maxTurnRate: 0,
 
     create: function(x, y, speed, direction) {
@@ -20,29 +20,43 @@ var Agent = {
         obj.velocity = Vector.create(0, 0);
         obj.velocity.setLength(speed);
         obj.velocity.setAngle(direction);
+        obj.acceleration = Vector.create(0, 0);
         return obj;
     },
 
     render: function(context) {
+        context.save();
+        context.translate(this.position.getX(), this.position.getY());
+        context.rotate(this.velocity.getAngle());
+
         context.beginPath();
-        context.arc(this.position.getX(), this.position.getY(),
-                    this.radius, 0, Math.PI * 2, false);
+        context.moveTo(15, 0);
+        context.lineTo(-15, -10);
+        context.lineTo(-15, 10);
+        context.lineTo(15, 0);
+
         context.fill();
+
+        context.restore();
     },
 
     seek: function(targetPos) {
-        var desiredVelocity = targetPos.subtract(this.position) * this.maxSpeed;
+        var desiredVelocity = targetPos.subtract(this.position)
+                                .normalized().multiply(this.maxSpeed);
         return desiredVelocity.subtract(this.velocity);
     },
 
     update(deltaTime, targetPos) {
         var steeringForce = this.seek(targetPos);
-        this.acceleration = steeringForce.divideBy(mass);
-        this.velocity += this.acceleration.multiply(deltaTime);
+        steeringForce.truncate(this.maxForce);
+        this.acceleration = steeringForce.divide(this.mass);
+        this.velocity.addTo(this.acceleration.multiply(deltaTime));
 
         if(this.velocity.getLength() > 0.000001)
         {
             this.side = this.velocity.normalized().perp();
         }
+
+        this.position.addTo(this.velocity.multiply(deltaTime));
     }
 }
