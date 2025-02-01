@@ -79,5 +79,17 @@ var Vector = {
     divideBy: function(value) {
         this._x /= value
         this._y /= value
+    },
+
+    normalized: function() {
+        var length = this.getLength();
+        return Vector.create(this._x / length, this._y / length);
+    },
+
+    perp: function() {;
+        var vector = Vector.create(0, 0);
+        vector.setLength(this.getLength());
+        vector.setAngle(this.getAngle() + Math.PI / 2);
+        return vector;
     }
 };
